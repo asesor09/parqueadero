@@ -1,1 +1,69 @@
+{% extends "base.html" %}
 
+{% block title %}Mapa del Parqueadero - Airport Parking{% endblock %}
+
+{% block content %}
+<style>
+    .buscador-contenedor {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .buscador-input {
+        width: 100%;
+        max-width: 400px;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+        border: 2px solid #bdc3c7;
+        border-radius: 25px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    
+    .buscador-input:focus {
+        border-color: #3498db;
+    }
+
+    .celda {
+        transition: opacity 0.3s, transform 0.2s;
+    }
+    .celda.oculta {
+        opacity: 0.2;
+        transform: scale(0.95);
+    }
+    .celda.resaltada {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+        border-color: #3498db;
+    }
+</style>
+
+<header class="cabecera">
+    <h1>Estado del Parqueadero</h1>
+    
+    <div class="buscador-contenedor">
+        <input type="text" id="buscadorPlacas" class="buscador-input" placeholder="🔍 Buscar por placa (Ej: ABC)..." autocomplete="off">
+    </div>
+
+    <div class="leyenda">
+        <span class="indicador libre">Libre</span>
+        <span class="indicador ocupada">Ocupada</span>
+    </div>
+</header>
+
+<div class="cuadricula-parqueadero">
+    {% for celda in celdas %}
+        <div class="celda {{ celda.estado }}" id="celda-{{ celda.codigo_celda }}">
+            <h2>{{ celda.codigo_celda }}</h2>
+            {% if celda.estado == 'ocupada' %}
+                <p class="matricula matricula-texto">{{ celda.matricula }}</p>
+            {% else %}
+                <p class="estado-texto">Disponible</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Enlazamos el script de forma externa y segura -->
+<script src="{{ url_for('static', filename='buscador.js') }}"></script>
+{% endblock %}
