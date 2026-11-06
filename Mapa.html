@@ -1,69 +1,81 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa Parqueadero</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; background: #333; color: white; padding: 10px 15px; border-radius: 5px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .celda { 
+            width: 90px; height: 90px; display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; border-radius: 8px; font-weight: bold; border: 2px solid #555; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1); text-align: center;
+        }
+        /* Colores de las celdas */
+        .interna.libre { background-color: #90ee90; }
+        .externa.libre { background-color: #add8e6; }
+        .ocupada { background-color: #ffcccb; color: #a00; border-color: #a00; }
+        .tipo-label { font-size: 0.7em; color: #555; margin-bottom: 5px; }
+        
+        /* ALERTA FLOTANTE (POP-UP) */
+        #modal-alerta {
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+        }
+        .modal-contenido {
+            background-color: #dc3545; color: white; margin: 10% auto; padding: 40px;
+            border: 4px solid #fff; border-radius: 12px; width: 80%; max-width: 550px; text-align: center;
+            box-shadow: 0px 0px 30px rgba(220, 53, 69, 0.9);
+            animation: latido 1.2s infinite; 
+        }
+        @keyframes latido { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+        .btn-cerrar { background: white; color: #dc3545; padding: 10px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; margin-top: 15px;}
+        .btn-ir { display:inline-block; background:#ffeb3b; color:#333; padding:10px 20px; text-decoration:none; font-weight:bold; border-radius:5px; margin-right:10px;}
+    </style>
+</head>
+<body>
+    <h1>Mapa del Parqueadero</h1>
 
-{% block title %}Mapa del Parqueadero - Airport Parking{% endblock %}
-
-{% block content %}
-<style>
-    .buscador-contenedor {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    
-    .buscador-input {
-        width: 100%;
-        max-width: 400px;
-        padding: 12px 20px;
-        font-size: 1.1rem;
-        border: 2px solid #bdc3c7;
-        border-radius: 25px;
-        outline: none;
-        transition: border-color 0.3s;
-    }
-    
-    .buscador-input:focus {
-        border-color: #3498db;
-    }
-
-    .celda {
-        transition: opacity 0.3s, transform 0.2s;
-    }
-    .celda.oculta {
-        opacity: 0.2;
-        transform: scale(0.95);
-    }
-    .celda.resaltada {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
-        border-color: #3498db;
-    }
-</style>
-
-<header class="cabecera">
-    <h1>Estado del Parqueadero</h1>
-    
-    <div class="buscador-contenedor">
-        <input type="text" id="buscadorPlacas" class="buscador-input" placeholder="🔍 Buscar por placa (Ej: ABC)..." autocomplete="off">
-    </div>
-
-    <div class="leyenda">
-        <span class="indicador libre">Libre</span>
-        <span class="indicador ocupada">Ocupada</span>
-    </div>
-</header>
-
-<div class="cuadricula-parqueadero">
-    {% for celda in celdas %}
-        <div class="celda {{ celda.estado }}" id="celda-{{ celda.codigo_celda }}">
-            <h2>{{ celda.codigo_celda }}</h2>
-            {% if celda.estado == 'ocupada' %}
-                <p class="matricula matricula-texto">{{ celda.matricula }}</p>
-            {% else %}
-                <p class="estado-texto">Disponible</p>
-            {% endif %}
+    <!-- VENTANA FLOTANTE -->
+    <div id="modal-alerta">
+        <div class="modal-contenido">
+            <h2 style="margin-top:0;">🚨 ¡ATENCIÓN AL ENCARGADO! 🚨</h2>
+            <p style="font-size: 1.3em;">Hay <strong><span id="num-alertas">0</span></strong> vehículo(s) programado(s) para salir hoy o con retraso.</p>
+            <a href="/entregas-pendientes" class="btn-ir">Ver Lista de Entregas</a>
+            <button class="btn-cerrar" onclick="document.getElementById('modal-alerta').style.display='none'">Cerrar Aviso</button>
         </div>
-    {% endfor %}
-</div>
+    </div>
 
-<!-- Enlazamos el script de forma externa y segura -->
-<script src="{{ url_for('static', filename='buscador.js') }}"></script>
-{% endblock %}
+    <div class="nav">
+        <a href="/registro">Registrar Ingreso</a>
+        <a href="/entregas-pendientes">Entregas y Salidas</a>
+    </div>
+
+    <div class="grid">
+        {% for celda in celdas %}
+            <div class="celda {{ celda.tipo }} {{ celda.estado }}">
+                <span class="tipo-label">{{ celda.tipo | upper }}</span>
+                <span>{{ celda.codigo_celda }}</span>
+                {% if celda.estado == 'ocupada' %}
+                    <span style="margin-top: 5px; font-size: 0.8em;">🚗 {{ celda.matricula }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- SCRIPT DE ALERTA -->
+    <script>
+        fetch('/api/alertas')
+            .then(response => response.json())
+            .then(data => {
+                if (data.hay_entregas) {
+                    document.getElementById('modal-alerta').style.display = 'block';
+                    document.getElementById('num-alertas').innerText = data.cantidad;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>

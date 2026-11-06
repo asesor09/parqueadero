@@ -1,51 +1,50 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Entregas</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 0.9em; }
+        th { background-color: #333; color: white; }
+        .form-entrega { display: flex; gap: 5px; }
+        .form-entrega input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-entregar { background-color: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; }
+        .btn-entregar:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Vehículos en el Parqueadero</h1>
+    <a href="/" style="color: #007bff; text-decoration: none;">🔙 Volver al Mapa</a>
 
-{% block title %}Entregas de Hoy - Airport Parking{% endblock %}
-
-{% block content %}
-<style>
-    .contenedor-entregas { max-width: 800px; margin: 0 auto; }
-    .contenedor-entregas h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
-    .grid-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-    .tarjeta { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #e67e22; display: flex; flex-direction: column; }
-    .tarjeta-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-    .matricula { font-size: 1.5rem; font-weight: bold; color: #34495e; }
-    .celda-badge { background-color: #3498db; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; }
-    .detalle { margin-bottom: 8px; color: #555; font-size: 1rem; }
-    .btn-entregar { margin-top: auto; background-color: #e74c3c; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; width: 100%; }
-    .btn-entregar:hover { background-color: #c0392b; }
-    .sin-entregas { text-align: center; background: #d4edda; color: #155724; padding: 20px; border-radius: 8px; font-size: 1.2rem; }
-</style>
-
-<div class="contenedor-entregas">
-    <h1>Vehículos a Entregar Hoy</h1>
-
-    {% if entregas %}
-        <div class="grid-tarjetas">
-            {% for entrega in entregas %}
-                <div class="tarjeta">
-                    <div class="tarjeta-header">
-                        <span class="matricula">{{ entrega.matricula }}</span>
-                        <span class="celda-badge">Celda {{ entrega.codigo_celda }}</span>
-                    </div>
-                    
-                    <div class="detalle">
-                        <strong>Marca:</strong> {{ entrega.marca or 'No especificada' }}
-                    </div>
-                    <div class="detalle">
-                        <strong>Hora programada:</strong> {{ entrega.fecha_hora_entrega.strftime('%H:%M') }}
-                    </div>
-                    
-                    <form action="{{ url_for('marcar_entregado', id_movimiento=entrega.id_movimiento) }}" method="POST" style="margin-top: 15px;">
-                        <button type="submit" class="btn-entregar">Marcar como Entregado</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="sin-entregas">
-            ✅ Todo al día. No hay entregas programadas para hoy.
-        </div>
-    {% endif %}
-</div>
-{% endblock %}
+    <table>
+        <tr>
+            <th>Placa</th>
+            <th>Celda</th>
+            <th>Propietario / Celular</th>
+            <th>Recibido por</th>
+            <th>Fecha Entrega Prometida</th>
+            <th>Acción de Salida</th>
+        </tr>
+        {% for entrega in entregas %}
+        <tr>
+            <td style="font-size: 1.1em;"><strong>{{ entrega.matricula }}</strong><br><span style="font-size: 0.8em; color: #777;">{{ entrega.marca }}</span></td>
+            <td><strong>{{ entrega.codigo_celda }}</strong></td>
+            <td>{{ entrega.propietario or 'No registrado' }}<br>📱 {{ entrega.celular or 'N/A' }}</td>
+            <td>{{ entrega.recibe or 'No registrado' }}</td>
+            <td>{{ entrega.fecha_hora_entrega }}</td>
+            <td>
+                <!-- Acción de salida -->
+                <form class="form-entrega" action="/marcar-entregado/{{ entrega.id_movimiento }}" method="POST">
+                    <input type="text" name="entrega" placeholder="¿Quién lo retira?" required>
+                    <button class="btn-entregar" type="submit">Retirar Vehículo</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align: center; padding: 20px;">No hay vehículos en el parqueadero actualmente.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
