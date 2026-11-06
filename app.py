@@ -7,16 +7,30 @@ import os
 app = Flask(__name__)
 
 # ==========================================
-# CONFIGURACIÓN DE BASE DE DATOS (CONEXIÓN DIRECTA A LA NUBE)
+# CONFIGURACIÓN DE BASE DE DATOS FLEXIBLE
 # ==========================================
 def get_db_connection():
-    # CONEXIÓN BLINDADA: Ignora variables locales y obliga al sistema a usar Render.
-    # REEMPLAZA LOS TEXTOS ENTRE COMILLAS POR TUS DATOS DE RENDER:
+    # 1. Prioridad: DATABASE_URL (si está configurada en Render)
+    url_nube = os.environ.get("DATABASE_URL")
+    if url_nube:
+        return psycopg2.connect(url_nube)
+    
+    # 2. Segunda opción: Variables individuales de Render (DB_HOST, DB_NAME, etc.)
+    host_nube = os.environ.get("DB_HOST")
+    if host_nube:
+        return psycopg2.connect(
+            host=host_nube,
+            database=os.environ.get("DB_NAME"),
+            user=os.environ.get("DB_USER"),
+            password=os.environ.get("DB_PASS")
+        )
+    
+    # 3. Tercera opción: Desarrollo local en tu PC
     return psycopg2.connect(
-        host="PEGAR_AQUI_EL_HOSTNAME",
-        database="PEGAR_AQUI_LA_DATABASE",
-        user="PEGAR_AQUI_EL_USERNAME",
-        password="PEGAR_AQUI_EL_PASSWORD"
+        host="localhost",
+        database="parqueadero_db",
+        user="postgres",
+        password="nuenama159"
     )
 
 # ==========================================
