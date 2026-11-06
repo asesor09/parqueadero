@@ -7,20 +7,17 @@ import os
 app = Flask(__name__)
 
 # ==========================================
-# CONFIGURACIÓN DE BASE DE DATOS LOCAL
+# CONFIGURACIÓN DE BASE DE DATOS (CONEXIÓN DIRECTA A LA NUBE)
 # ==========================================
-DB_HOST = "localhost"
-DB_NAME = "parqueadero_db"
-DB_USER = "postgres"
-DB_PASS = "nuenama159"
-
 def get_db_connection():
-    # Detecta automáticamente si está en la nube o usa tu PC con la clave "nuenama159"
-    url_nube = os.environ.get("DATABASE_URL")
-    if url_nube:
-        return psycopg2.connect(url_nube)
-    else:
-        return psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS)
+    # CONEXIÓN BLINDADA: Ignora variables locales y obliga al sistema a usar Render.
+    # REEMPLAZA LOS TEXTOS ENTRE COMILLAS POR TUS DATOS DE RENDER:
+    return psycopg2.connect(
+        host="PEGAR_AQUI_EL_HOSTNAME",
+        database="PEGAR_AQUI_LA_DATABASE",
+        user="PEGAR_AQUI_EL_USERNAME",
+        password="PEGAR_AQUI_EL_PASSWORD"
+    )
 
 # ==========================================
 # RUTA 1: MAPA VISUAL DEL PARQUEADERO
@@ -168,6 +165,7 @@ def api_alertas():
         "cantidad": len(pendientes),
         "vehiculos": pendientes
     })
+
 # ==========================================
 # RUTA SECRETA PARA INSTALAR LA BASE DE DATOS
 # ==========================================
@@ -179,6 +177,7 @@ def instalar_base_datos():
         return "<h1>¡Éxito! Base de datos instalada.</h1><br><a href='/'>Ir al mapa del parqueadero</a>"
     except Exception as e:
         return f"<h1>Error al instalar:</h1><p>{e}</p>"
+
 # ==========================================
 # INICIALIZACIÓN AUTOMÁTICA AL ARRANCAR
 # ==========================================
