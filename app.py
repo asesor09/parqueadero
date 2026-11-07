@@ -166,6 +166,21 @@ def api_alertas():
     })
 
 # ==========================================
+# RUTA DE EMERGENCIA: RESET DE BASE DE DATOS
+# ==========================================
+@app.route('/reset-urgente-db')
+def reset_db():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS movimientos CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS vehiculos CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS celdas CASCADE;")
+    conn.commit()
+    cur.close()
+    conn.close()
+    return "✅ Base de datos limpiada con éxito. Ya puedes abrir la página principal para crear las nuevas tablas automáticamente."
+
+# ==========================================
 # INICIALIZACIÓN DE LA BASE DE DATOS
 # ==========================================
 with app.app_context():
@@ -209,7 +224,6 @@ with app.app_context():
         conn.commit()
         cur.close()
         conn.close()
-        print("Base de datos y 140 celdas listas.")
     except Exception as e:
         print(f"Error inicializando BD: {e}")
 
