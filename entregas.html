@@ -35,7 +35,6 @@
             <td>{{ entrega.recibe or 'No registrado' }}</td>
             <td>{{ entrega.fecha_hora_entrega }}</td>
             <td>
-                <!-- Acción de salida -->
                 <form class="form-entrega" action="/marcar-entregado/{{ entrega.id_movimiento }}" method="POST">
                     <input type="text" name="entrega" placeholder="¿Quién lo retira?" required>
                     <button class="btn-entregar" type="submit">Retirar Vehículo</button>

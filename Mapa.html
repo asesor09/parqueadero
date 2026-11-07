@@ -13,7 +13,6 @@
             justify-content: center; border-radius: 8px; font-weight: bold; border: 2px solid #555; 
             box-shadow: 2px 2px 5px rgba(0,0,0,0.1); text-align: center;
         }
-        /* Colores de las celdas */
         .interna.libre { background-color: #90ee90; }
         .externa.libre { background-color: #add8e6; }
         .ocupada { background-color: #ffcccb; color: #a00; border-color: #a00; }
@@ -38,7 +37,6 @@
 <body>
     <h1>Mapa del Parqueadero</h1>
 
-    <!-- VENTANA FLOTANTE -->
     <div id="modal-alerta">
         <div class="modal-contenido">
             <h2 style="margin-top:0;">🚨 ¡ATENCIÓN AL ENCARGADO! 🚨</h2>
@@ -65,7 +63,6 @@
         {% endfor %}
     </div>
 
-    <!-- SCRIPT DE ALERTA -->
     <script>
         fetch('/api/alertas')
             .then(response => response.json())
